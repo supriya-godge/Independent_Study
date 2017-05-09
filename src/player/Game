@@ -1,0 +1,20 @@
+The processing of the Game server:
+
+1) A server(Engine.java) is always running. It waits to recevie the request on the port 9001.
+2) A user starts the Client proxy program. Client proxy instantiates the players.
+3) Client proxy connects to the server on the port 9001.
+As a response to the connection server sends this message to Player:
+{"JSONCommand":"Confirm","Status":"Successful","GameId":1001}
+5)Client proxy then initiates the game by sending the init message with the player information.
+From Client proxy to server {"JSONCommand":"Initialize","Player2":999,"Player1":60}
+where, 999 is a reserved id for the server player.
+6) The engine then instantiates the server player and starts the game.
+7) Engine starts the game, by requesting the move from both players. The game ends when,
+    i) One player has won
+    ii) Game is draw
+    iii) Both players are invalidated
+8) Engine directly communicates to the server proxy, engine doesn't care if the player is local or remote.
+it is handled by the server proxy.
+9) Server proxy then checks if the message is directed to the server player or the remote player.
+If it is a remote player then server proxy uses the socket to send the message.
+If it is a server player then server proxy uses the method call to send the message.
