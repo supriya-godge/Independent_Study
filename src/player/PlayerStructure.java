@@ -29,6 +29,10 @@ public interface PlayerStructure {
      String getMark();
     int getID();
 
+    int getTableSize();
+
+    public TicTacToe getaTicTactoe();
+
 
 
 
@@ -38,6 +42,8 @@ public interface PlayerStructure {
     till the completion even if player is the only player in the game.
      */
     void playerInvalidated(int playerId);
+
+
 
     /*
     This method diaplyes the current state of the gme board

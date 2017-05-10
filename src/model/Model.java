@@ -16,25 +16,26 @@ public class Model implements ModelStructure{
     }
 
     @Override
-    public boolean isWin(String mark ) {
+    public boolean isWin(PlayerMove aPlayerMove ) {
+        int id=aPlayerMove.getId();
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++) {
-            boolean ans = checkrow(iter, mark);
+            boolean ans = checkrow(iter, id);
             if (ans) {
                 System.out.println(ans);
                 return true;
             }
         }
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
-            boolean ans = checkcolumn(iter, mark);
+            boolean ans = checkcolumn(iter, id);
 
             if (ans) {
-                System.out.println("winner is  "+mark);
+                System.out.println("winner is  "+id);
                 return true;
             }
         }
         boolean win = true;
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
-            if (!aTicTacToe.getBoard(iter,iter).equals(" ") && mark.equals(aTicTacToe.getBoard(iter,iter))){
+            if (aTicTacToe.getBoard(iter,iter)!= 0 && id==aTicTacToe.getBoard(iter,iter)){
                 continue;
             }
             else{
@@ -48,7 +49,7 @@ public class Model implements ModelStructure{
         win = true;
         int jiter=aTicTacToe.getTableSize()-1;
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
-            if (!aTicTacToe.getBoard(iter,jiter).equals(" ") && mark.equals(aTicTacToe.getBoard(iter,jiter))){
+            if (aTicTacToe.getBoard(iter,jiter)!= 0 && id==aTicTacToe.getBoard(iter,jiter)){
                 jiter--;
                 continue;
             }
@@ -65,11 +66,11 @@ public class Model implements ModelStructure{
         return false;
     }
 
-    public boolean checkrow(int row, String mark){
+    public boolean checkrow(int row, int id){
         boolean win = true;
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
 
-            if (!aTicTacToe.getBoard(iter,row).equals(" ") && mark.equals(aTicTacToe.getBoard(iter,row))){
+            if (aTicTacToe.getBoard(iter,row)!= 0 && id==aTicTacToe.getBoard(iter,row)){
                 continue;
             }
             else{
@@ -80,11 +81,11 @@ public class Model implements ModelStructure{
         return win;
     }
 
-    private boolean checkcolumn(int row, String mark) {
+    private boolean checkcolumn(int row, int id) {
         boolean win = true;
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
 
-            if (!aTicTacToe.getBoard(row,iter).equals(" ")&& mark.equals(aTicTacToe.getBoard(row, iter))){
+            if (aTicTacToe.getBoard(row,iter)!= 0&& id==aTicTacToe.getBoard(row, iter)){
                 continue;
             }
             else{
@@ -100,7 +101,7 @@ public class Model implements ModelStructure{
     public boolean isDraw() {
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
             for(int jiter=0;jiter<aTicTacToe.getTableSize();jiter++){
-                if (aTicTacToe.getBoard(iter , jiter).equals(" "))
+                if (aTicTacToe.getBoard(iter , jiter)== 0)
                     return false;
             }
         }
@@ -110,7 +111,7 @@ public class Model implements ModelStructure{
     @Override
     public void updateBoard(PlayerMove aPlayerMove) {
          if(checkIfMoveValid(aPlayerMove)){
-            aTicTacToe.setBoard(aPlayerMove.getRow(),aPlayerMove.getColumn(), aPlayerMove.getMark());
+            aTicTacToe.setBoard(aPlayerMove.getRow(),aPlayerMove.getColumn(), aPlayerMove.getId());
         }
     }
 
@@ -118,7 +119,7 @@ public class Model implements ModelStructure{
     public boolean checkIfMoveValid(PlayerMove aPlayerMove) {
         if (aPlayerMove.getRow() < aTicTacToe.getTableSize() &&
                 aPlayerMove.getRow() < aTicTacToe.getTableSize() &&
-                aTicTacToe.getBoard(aPlayerMove.getRow(),aPlayerMove.getColumn()).equals(" "))
+                aTicTacToe.getBoard(aPlayerMove.getRow(),aPlayerMove.getColumn())== 0)
             return true;
         return false;
     }

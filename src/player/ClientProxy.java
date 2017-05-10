@@ -15,18 +15,16 @@ import java.util.Random;
 public class ClientProxy implements Callable<String> {
     NetworkCommunication aNetworkCommunication;
     Socket client;
-    PlayerStructure player1;
-    PlayerStructure player2;
+    PlayerStructure[] player;
     int gameId;
     static Random aRandom;
     JSONObject json;
     PlayerStructure current;
 
-    public ClientProxy(PlayerStructure player1, PlayerStructure player2){
-        this.player1 = player1;
-        this.player2 = player2;
+    public ClientProxy(PlayerStructure[] player){
+        this.player = player;
 
-             aNetworkCommunication = new NetworkCommunication();
+        aNetworkCommunication = new NetworkCommunication();
 
     }
 
@@ -34,7 +32,8 @@ public class ClientProxy implements Callable<String> {
         aRandom= new Random();
         PlayerA player1 = new PlayerA( aRandom.nextInt(300),3,TicTacToe.CROSS);
         PlayerA player2 = new PlayerA(999,3,TicTacToe.ROUND);
-        ClientProxy aClientPlayer = new ClientProxy(player1,player2);
+        PlayerStructure[] player={player1,player2};
+        ClientProxy aClientPlayer = new ClientProxy(player);
         FutureTask<String> futureTask1 = new FutureTask<>(aClientPlayer);
         ExecutorService executor = Executors.newFixedThreadPool(1);
 
@@ -89,9 +88,11 @@ public class ClientProxy implements Callable<String> {
     }
 
     public PlayerStructure getPlayer(int id){
-        if (player1.getID() == id)
-            return player1;
-        return player2;
+        for (PlayerStructure aplayer:player) {
+            if (aplayer.getID() == id)
+                return aplayer;
+        }
+        return null;
     }
 
 
@@ -111,22 +112,20 @@ public class ClientProxy implements Callable<String> {
                 PlayerStructure aPlayerStructure = getPlayer(id);
                 current = aPlayerStructure;
                 PlayerMove aPlayerMove = new PlayerMove((int)(long)aJSONObject.get("Row"),
-                        (int)(long) aJSONObject.get("Column"),aPlayerStructure.getMark (),
+                        (int)(long) aJSONObject.get("Column"),
                         (int)(long)aJSONObject.get("Id"));
                 id = (int)(long)aJSONObject.get("SendToId");
                 aPlayerStructure = getPlayer(id);
                 aPlayerStructure.lastMove(aPlayerMove);
                 System.out.println(aPlayerStructure);
+                System.out.println(this);
                 break;
             case JSONCommand.REQUEST:
-
-                if (player1.getID()==((int)(long) aJSONObject.get("PlayerId"))) {
-                    current = player1;
-                    send("Move", player1);
-                }
-                else {
-                    current = player2;
-                    send("Move", player2);
+                for(PlayerStructure aplayer:player) {
+                    if (aplayer.getID() == ((int) (long) aJSONObject.get("PlayerId"))) {
+                        current = aplayer;
+                        send("Move", aplayer);
+                    }
                 }
                 break;
 
@@ -142,26 +141,24 @@ public class ClientProxy implements Callable<String> {
     /*
     This method convert the data into JSON object
      */
-    public JSONObject StringtoJSON(String state, PlayerStructure player) {
-        System.out.println("Inside the string to json"+state);
+    public JSONObject StringtoJSON(String state, PlayerStructure aplayer) {
         JSONObject json = new JSONObject();
         json.put("JSONCommand",state);
         switch (state){
             case JSONCommand.INITIALIZE:
                 //json.put("Server","Yes");
-                json.put("Player1",player1.getID());
-                json.put("Player2",player2.getID());
+                json.put("Player1",player[0].getID());
+                json.put("Player2",player[1].getID());
                 break;
             case JSONCommand.MOVE:
-                System.out.println(player.getID());
-                PlayerMove aPlayerMove = player.move();
+                PlayerMove aPlayerMove = aplayer.move();
                 json.put("Row",aPlayerMove.getRow());
                 json.put("Column",aPlayerMove.getColumn());
                 json.put("Id",aPlayerMove.getId());
                 break;
             case JSONCommand.INVALIDATE:
-                System.out.println("Player Invalidated "+player.getID());
-                json.put("PlayerId",player.getID());
+                System.out.println("Player Invalidated "+aplayer.getID());
+                json.put("PlayerId",aplayer.getID());
         }
         return json;
     }
@@ -172,6 +169,35 @@ public class ClientProxy implements Callable<String> {
         JSONprocess(json);
         return null;
     }
+
+    public String toString(){
+        String boardMark[][]=convertBoard();
+        String printable = "  "+boardMark[0][0]+"   |  "+ boardMark[0][1]+"    |  "+boardMark[0][2]+"   \n"+
+                "______|_______|______\n"+
+                "      |       |     \n"+
+                "  "+boardMark[1][0]+"   |  "+ boardMark[1][1]+"    |  "+boardMark[1][2]+"   \n"+
+                "______|_______|______\n"+
+                "      |       |     \n"+
+                "  "+boardMark[2][0]+"   |  "+ boardMark[2][1]+"    |  "+boardMark[2][2]+"   \n";
+
+        return printable;
+    }
+
+    private String[][] convertBoard() {
+        int tableSize = player[0].getTableSize();
+        String[][] boardMark = new String[tableSize][tableSize];
+        for (int iter=0;iter<tableSize;iter++){
+            for(int jiter=0;jiter<tableSize;jiter++){
+                boardMark[iter][jiter]=" ";
+                for (PlayerStructure aplayer :player) {
+                    if (player[0].getaTicTactoe().getBoard(iter,jiter) == aplayer.getID())
+                        boardMark[iter][jiter] = aplayer.getMark();
+                }
+            }
+        }
+        return boardMark;
+    }
+
 }
 
 

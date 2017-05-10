@@ -61,7 +61,7 @@ public class ServerPlayerProxy implements Callable<String> {
                 int id = (int)aJSONObject.get("Id");
                 String mark = getPlayer(id);
                 PlayerMove aPlayerMove = new PlayerMove((int)aJSONObject.get("Row"),
-                        (int) aJSONObject.get("Column"),mark,
+                        (int) aJSONObject.get("Column"),
                         (int)aJSONObject.get("Id"));
                 player1.lastMove(aPlayerMove);
                 //System.out.println(player1);

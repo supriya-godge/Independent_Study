@@ -11,10 +11,24 @@ public class PlayerA implements PlayerStructure{
     private String  mark;
     private TicTacToe aTicTactoe;
     private static int tableSize=3;
+    private int opponent;
 
+    public  int getTableSize() {
+        return tableSize;
+    }
+
+    public TicTacToe getaTicTactoe() {
+        return aTicTactoe;
+    }
+
+    public  void setTableSize(int tableSize) {
+        PlayerA.tableSize = tableSize;
+    }
 
     public PlayerA(){
     }
+
+
 
 
 
@@ -36,7 +50,7 @@ public class PlayerA implements PlayerStructure{
 
     @Override
     public void lastMove(PlayerMove aPlayerMove) {
-        aTicTactoe.setBoard(aPlayerMove.getRow(),aPlayerMove.getColumn(),aPlayerMove.getMark());
+        aTicTactoe.setBoard(aPlayerMove.getRow(),aPlayerMove.getColumn(),aPlayerMove.getId());
         //System.out.println(this);
 
     }
@@ -47,7 +61,7 @@ public class PlayerA implements PlayerStructure{
         PlayerMove aPlayerMove=null;
         boolean found = false;
         while(!found){
-            aPlayerMove = new PlayerMove(rand.nextInt(3),rand.nextInt(3),mark,playerId);
+            aPlayerMove = new PlayerMove(rand.nextInt(3),rand.nextInt(3),playerId);
             if (aTicTactoe.isFree(aPlayerMove)) {
                 found = true;
             }
@@ -87,7 +101,7 @@ public class PlayerA implements PlayerStructure{
 
     public String toString(){
 
-        return aTicTactoe.toString();
+        return "Id:"+playerId+" mark"+mark;
     }
 
 

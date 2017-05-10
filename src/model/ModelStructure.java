@@ -9,7 +9,7 @@ public interface ModelStructure {
     /*
     This method checks if a player who played last has won or not.
      */
-    boolean isWin(String mark);
+    boolean isWin(PlayerMove aPlayerMove);
 
     /*
     This method checks if the game is draw.

@@ -6,13 +6,11 @@ package player;
 public class PlayerMove {
     private int row;
     private int column;
-    private String mark;
     private int playerId;
 
-    public PlayerMove(int row, int column, String mark,int playerId){
+    public PlayerMove(int row, int column,int playerId){
         this.row = row;
         this.column = column;
-        this.mark = mark;
         this.playerId = playerId;
     }
 
@@ -26,10 +24,6 @@ public class PlayerMove {
 
     public int getColumn(){
         return column;
-    }
-
-    public String getMark(){
-        return mark;
     }
 
     public String toString(){

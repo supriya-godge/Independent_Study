@@ -13,6 +13,7 @@ public class ServerPlayer implements PlayerStructure {
     private String  mark;
     private TicTacToe aTicTacToe;
     private static int tableSize=3;
+    private int opponent;
 
     public ServerPlayer(){
 
@@ -34,7 +35,7 @@ public class ServerPlayer implements PlayerStructure {
 
     @Override
     public void lastMove(PlayerMove aPlayerMove) {
-        aTicTacToe.setBoard(aPlayerMove.getRow(),aPlayerMove.getColumn(),aPlayerMove.getMark());
+        aTicTacToe.setBoard(aPlayerMove.getRow(),aPlayerMove.getColumn(),aPlayerMove.getId());
         
         //System.out.println(this);
 
@@ -43,16 +44,14 @@ public class ServerPlayer implements PlayerStructure {
     @Override
     public PlayerMove move(){
         Random rand = new Random();
-        PlayerMove aPlayerMove=null;
+        PlayerMove me=new PlayerMove(0,0,playerId);
+        PlayerMove opp = new PlayerMove(0,0,opponent);
         int[] result;
-        if (mark.equals("X"))
-            result=maxD(0,mark,"O");
-        else
-            result=maxD(0,mark,"X");
+        result=maxD(0,me,opp);
         int r=result[1];
         int c=result[2];
-        aPlayerMove=new PlayerMove(r,c,mark,playerId);
-        return  aPlayerMove;
+        me=new PlayerMove(r,c,playerId);
+        return  me;
     }
 
     @Override
@@ -91,25 +90,26 @@ public class ServerPlayer implements PlayerStructure {
         return false;
     }
 
-    public boolean isWin(String mark ) {
+    public boolean isWin(PlayerMove aPlayerMove ) {
+        int id=aPlayerMove.getId();
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++) {
-            boolean ans = checkrow(iter, mark);
+            boolean ans = checkrow(iter, id);
             if (ans) {
-                System.out.println(ans);
-                return ans;
+                //System.out.println(ans);
+                return true;
             }
         }
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
-            boolean ans = checkcolumn(iter, mark);
+            boolean ans = checkcolumn(iter, id);
 
             if (ans) {
-                System.out.println("winner is  "+mark);
-                return ans;
+                //System.out.println("winner is  "+id);
+                return true;
             }
         }
         boolean win = true;
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
-            if (!aTicTacToe.getBoard(iter,iter).equals(" ") && mark.equals(aTicTacToe.getBoard(iter,iter))){
+            if (aTicTacToe.getBoard(iter,iter)!= 0 && id==aTicTacToe.getBoard(iter,iter)){
                 continue;
             }
             else{
@@ -123,7 +123,7 @@ public class ServerPlayer implements PlayerStructure {
         win = true;
         int jiter=aTicTacToe.getTableSize()-1;
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
-            if (!aTicTacToe.getBoard(iter,jiter).equals(" ") && mark.equals(aTicTacToe.getBoard(iter,jiter))){
+            if (aTicTacToe.getBoard(iter,jiter)!= 0 && id==aTicTacToe.getBoard(iter,jiter)){
                 jiter--;
                 continue;
             }
@@ -140,11 +140,11 @@ public class ServerPlayer implements PlayerStructure {
         return false;
     }
 
-    public boolean checkrow(int row, String mark){
+    public boolean checkrow(int row, int id){
         boolean win = true;
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
 
-            if (!aTicTacToe.getBoard(iter,row).equals(" ") && mark.equals(aTicTacToe.getBoard(iter,row))){
+            if (aTicTacToe.getBoard(iter,row)!= 0 && id==aTicTacToe.getBoard(iter,row)){
                 continue;
             }
             else{
@@ -155,11 +155,11 @@ public class ServerPlayer implements PlayerStructure {
         return win;
     }
 
-    private boolean checkcolumn(int row, String mark) {
+    private boolean checkcolumn(int row, int id) {
         boolean win = true;
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
 
-            if (!aTicTacToe.getBoard(row,iter).equals(" ")&& mark.equals(aTicTacToe.getBoard(row, iter))){
+            if (aTicTacToe.getBoard(row,iter)!= 0&& id==aTicTacToe.getBoard(row, iter)){
                 continue;
             }
             else{
@@ -172,8 +172,7 @@ public class ServerPlayer implements PlayerStructure {
     }
 
 
-
-    public int[] maxD(int count, String piece, String opp) {
+    public int[] maxD(int count, PlayerMove  piece, PlayerMove opp) {
         boolean end = false;
         int utility=0;
         if (isWin(piece)){
@@ -198,7 +197,7 @@ public class ServerPlayer implements PlayerStructure {
         ArrayList<PlayerMove> get_sucessor = aTicTacToe.getAllFreeSpaces();
         for (PlayerMove tern : get_sucessor){
             count += 1;
-            aTicTacToe.setBoard(tern.getRow(), tern.getColumn(), piece);
+            aTicTacToe.setBoard(tern.getRow(), tern.getColumn(), piece.getId());
             int[] returnVal = minD(count,piece,opp);
             int val1=returnVal[0]; int x1=returnVal[1]; int y1 = returnVal[2]; count = returnVal[3];
             if (value < val1){
@@ -213,7 +212,7 @@ public class ServerPlayer implements PlayerStructure {
 
     }
 
-    public int[] minD(int count, String piece,String opp ){
+    public int[] minD(int count, PlayerMove piece,PlayerMove opp ){
     boolean end=false;
     int utility=0;
     if (isWin(piece)){
@@ -239,7 +238,7 @@ public class ServerPlayer implements PlayerStructure {
     ArrayList<PlayerMove> get_sucessor = aTicTacToe.getAllFreeSpaces();
     for (PlayerMove tern : get_sucessor){
         count += 1;
-        aTicTacToe.setBoard(tern.getRow(),tern.getColumn(),opp);
+        aTicTacToe.setBoard(tern.getRow(),tern.getColumn(),opp.getId());
         int[]  returnVal= maxD(count,piece,opp);
         int val1=returnVal[0]; int x1=returnVal[1]; int y1 = returnVal[2]; count = returnVal[3];
             if (value > val1){
@@ -257,16 +256,18 @@ public class ServerPlayer implements PlayerStructure {
         ServerPlayer aServerPlayer = new ServerPlayer();
        Scanner scan = new Scanner(System.in);
         aServerPlayer.init(3,123,"X");
-        while(!aServerPlayer.isWin("O") && !aServerPlayer.isWin("X")){
+        PlayerMove me=null;
+        PlayerMove opp=null;
+        while(!aServerPlayer.isWin(me) && !aServerPlayer.isWin(opp)){
             System.out.println("Enter row and column");
             int r = scan.nextInt();
             int c = scan.nextInt();
-            aServerPlayer.aTicTacToe.setBoard(r,c,"O");
+            aServerPlayer.aTicTacToe.setBoard(r,c,30);
             System.out.println(aServerPlayer);
-            int[] result=aServerPlayer.maxD(0,"X","O");
+            int[] result=aServerPlayer.maxD(0,me,opp);
             r=result[1];
             c=result[2];
-            aServerPlayer.aTicTacToe.setBoard(r,c,"X");
+            aServerPlayer.aTicTacToe.setBoard(r,c,aServerPlayer.getID());
             System.out.println("Selected:"+r+" "+c);
             System.out.println(aServerPlayer);
         }

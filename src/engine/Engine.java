@@ -35,14 +35,14 @@ public class Engine implements Runnable{
         aLogger = new Logger();
         aProxyGameServer = new ProxyGameServer();
         player.add(new PlayerInfo(TicTacToe.CROSS));
-        player.get(0).isLocal = false;
+        player.get(0).setIsLocal(false);
         player.add(new PlayerInfo(TicTacToe.ROUND));
     }
 
     public String getMark(int id){
         for(int iter=0;iter<player.size();iter++){
-            if(player.get(iter).id == id){
-                return player.get(iter).mark;
+            if(player.get(iter).getId()== id){
+                return player.get(iter).getMark();
             }
         }
         return null;
@@ -95,17 +95,16 @@ public class Engine implements Runnable{
         boolean gameOver = false;
         int index=0;
         PlayerInfo prevPlayer=player.get(0);
+        //PlayerMove aPlayerMove;
         do {
             PlayerInfo currentPlayer = player.get(index%player.size());
-            if (!aModel.isDraw() && !aModel.isWin(prevPlayer.mark)) {
-                System.out.println("Current Player::" + currentPlayer);
-                requestMove(currentPlayer);
-                if (!currentPlayer.isLocal) {
-                    JSONObject json = aProxyGameServer.receive();
-                    JSONprocess(json);
-                }
-                 prevPlayer = currentPlayer;
-            }else{
+            System.out.println("Current Player::" + currentPlayer);
+            requestMove(currentPlayer);
+            if (!currentPlayer.getIsLocal()) {
+                JSONObject json = aProxyGameServer.receive();
+                JSONprocess(json);
+            }
+            if (aModel.isDraw() || aModel.isWin(aLastMove)) {
                 System.out.println("Game over");
                 gameOver = true;
             }
@@ -125,26 +124,26 @@ public class Engine implements Runnable{
                 int player2 = (int) (long)aJSONObject.get("Player2");
                 //if (remote.toLowerCase().equals("no")) {
                 if(player2<500){
-                    player.get(0).id = (int)(long) aJSONObject.get("Player1");
+                    player.get(0).setId((int)(long) aJSONObject.get("Player1"));
                 //    player.get(1).id = (int) (long)aJSONObject.get("Player2");
-                    player.get(1).id=player2;
-                    player.get(0).isLocal = false;
-                    player.get(1).isLocal = false;
+                    player.get(1).setId(player2);
+                    player.get(0).setIsLocal(false);
+                    player.get(1).setIsLocal(false);
                     System.out.println("We got player" + player.get(0) + " and player" + player.get(1));
                 }
                 else{
-                    player.get(0).id = (int)(long) aJSONObject.get("Player1");
-                    player.get(0).isLocal = false;
+                    player.get(0).setId((int)(long) aJSONObject.get("Player1"));
+                    player.get(0).setIsLocal(false);
                     serverplayer = new ServerPlayerProxy(this);
                     aProxyGameServer.init(serverplayer);
-                    player.get(1).id=player2;
-                    player.get(1).isLocal = true;
+                    player.get(1).setId(player2);
+                    player.get(1).setIsLocal(true);
             }
                 break;
             case JSONCommand.MOVE:
                 int id =(int)(long)aJSONObject.get("Id");
                 PlayerMove aPlayerMove = new PlayerMove((int)(long)aJSONObject.get("Row"),
-                        (int)(long) aJSONObject.get("Column"),getMark(id),id );
+                        (int)(long) aJSONObject.get("Column"),id );
                 aLastMove = aPlayerMove;
                 if (aModel.checkIfMoveValid(aPlayerMove)) {
                     aModel.updateBoard(aPlayerMove);
@@ -174,7 +173,7 @@ public class Engine implements Runnable{
 
     public void removePlayer(int id){
         for(int iter=0;iter<player.size();iter++){
-            if(player.get(iter).id ==id) {
+            if(player.get(iter).getId() ==id) {
                 player.remove(iter);
                 return;
             }
@@ -194,10 +193,10 @@ public class Engine implements Runnable{
                     json.put("Row",aLastMove.getRow());
                     json.put("Column",aLastMove.getColumn());
                     json.put("Id",aLastMove.getId());
-                    json.put("SendToId",player.id);
+                    json.put("SendToId",player.getId());
                     break;
             case JSONCommand.REQUEST:
-                    json.put("PlayerId",player.id);
+                    json.put("PlayerId",player.getId());
                     break;
             case JSONCommand.CONFIRM:
                     json.put("Status","Successful");
@@ -207,6 +206,8 @@ public class Engine implements Runnable{
         System.out.println("sent"+json.toJSONString());
         return json;
     }
+
+
 
 
 }
