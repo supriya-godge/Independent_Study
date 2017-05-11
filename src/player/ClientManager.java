@@ -47,11 +47,39 @@ public class ClientManager implements Callable<String> {
 
     public static void main(String[] str){
         ClientManager temp = new ClientManager();
-        System.out.println(str[0]+" "+str[1]);
-        temp.start(str[0],str[1]);
+        String tutple[] =temp.readFile();
+        temp.start(tutple[0],tutple[1]);
 
 
     }
+
+    private String[] readFile() {
+        String line = null, class1=null, class2=null,dim =null;
+        try (FileReader fr = new FileReader("config.txt")) {
+            try (BufferedReader br = new BufferedReader(fr)) {
+                while ((line = br.readLine()) != null) {
+                    if (line.substring(0,1).equals("#"))
+                        continue;
+                    String[] words = line.split(" ");
+                    if(words[0].equals("CLASS1"))
+                        class1 = words[1];
+                    if(words[0].equals("CLASS2"))
+                        class2 = words[1];
+                    if(words[0].equals("DIM"))
+                        dim = words[1];
+
+                }
+
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String[] tuple = {class1,class2,dim};
+        return tuple;
+    }
+
 
     public  void start(String class1, String class2)  {
         aRandom = new Random();

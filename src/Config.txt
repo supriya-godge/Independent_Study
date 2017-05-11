@@ -8,8 +8,8 @@
 DIM 7
 
 # Name of the first player class
-player.PlayerA
+PLAYER1 player.PlayerA
 
 #Name of the second player class
-player.PlayerA
+PLAYER2 player.PlayerA
 
