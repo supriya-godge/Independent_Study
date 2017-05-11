@@ -1,7 +1,9 @@
 package engine;
 
-/**
- * Created by sup33 on 4/18/2017.
+/** This class holds the player information
+ *  Auther: Supriya Godge
+ *         Sean Srout
+ *         James Helliotis
  */
 public class PlayerInfo{
     private int id;

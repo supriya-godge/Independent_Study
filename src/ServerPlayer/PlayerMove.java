@@ -1,8 +1,12 @@
 package ServerPlayer;
 
 /**
- * Created by sup33 on 3/13/2017.
+ * This is a player move class it stores the moves of the players
+ * Auther: Supriya Godge
+ *         Sean Srout
+ *         James Helliotis
  */
+
 public class PlayerMove {
     private int row;
     private int column;

@@ -5,19 +5,21 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 /**
- * Created by sup33 on 3/13/2017.
+ * This is the logging class, it creates the log files
+ * Auther: Supriya Godge
+ *         Sean Srout
+ *         James Helliotis
  */
 public class Logger {
      String fileName;
 
-    public Logger(){
-        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-        fileName = "GameLog"+dateFormat;
+    public Logger(int gameId){
+        fileName = "GameLog"+gameId+".txt";
     }
 
     public void write(String data){
         try {
-            FileWriter fileWrite = new FileWriter(fileName, true); //the true will append the new data
+            FileWriter fileWrite = new FileWriter(fileName, true); //true, will append the new data on existing file
             fileWrite.write(data+"\n");//appends the string to the file
             fileWrite.close();
         } catch (IOException e) {

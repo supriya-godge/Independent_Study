@@ -1,100 +1,76 @@
 package player;
 
-import org.json.simple.JSONObject;
-import sun.net.ConnectionResetException;
-
-import java.io.IOException;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.util.concurrent.*;
-import java.util.Random;
 
 /**
- * Created by sup33 on 3/21/2017.
+ * This is the network communication class which is responsible for lower level
+ * network communication. It uses the sockets and TCP connection for the communication
+ * Auther: Supriya Godge
+ *         Sean Srout
+ *         James Helliotis
  */
-public class ClientProxy implements Callable<String> {
-    NetworkCommunication aNetworkCommunication;
-    Socket client;
-    PlayerStructure[] player;
-    int gameId;
-    static Random aRandom;
-    JSONObject json;
-    PlayerStructure current;
 
-    public ClientProxy(PlayerStructure[] player){
-        this.player = player;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
-        aNetworkCommunication = new NetworkCommunication();
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
-    }
 
-    public static void main(String[] str){
-        aRandom= new Random();
-        PlayerA player1 = new PlayerA( aRandom.nextInt(300),3,TicTacToe.CROSS);
-        PlayerA player2 = new PlayerA(999,3,TicTacToe.ROUND);
-        PlayerStructure[] player={player1,player2};
-        ClientProxy aClientPlayer = new ClientProxy(player);
-        FutureTask<String> futureTask1 = new FutureTask<>(aClientPlayer);
-        ExecutorService executor = Executors.newFixedThreadPool(1);
 
-        try {
-            aClientPlayer.json=aClientPlayer.aNetworkCommunication.receive(aClientPlayer.client);
-            executor.execute(futureTask1);
-            futureTask1.get(200L, TimeUnit.MILLISECONDS);
+    public class ClientProxy {
+        private static Socket clientSock;
+        private BufferedReader din;
+        private PrintWriter out;
+        ClientManager aClientProxy;
 
-            aClientPlayer.send(JSONCommand.INITIALIZE,null);
 
-                do{
-                    try {
-                        aClientPlayer.json = aClientPlayer.aNetworkCommunication.receive(aClientPlayer.client);
-                        //executor.execute(futureTask1);
-                        futureTask1 = new FutureTask<>(aClientPlayer);
-                        executor = Executors.newFixedThreadPool(1);
-                        executor.execute(futureTask1);
-                        futureTask1.get(20000L, TimeUnit.MILLISECONDS);
-                    }catch (TimeoutException e) {
-                        System.out.println("Timeout Exception");
-                        JSONObject json=aClientPlayer.StringtoJSON(JSONCommand.INVALIDATE,aClientPlayer.current);
-                        aClientPlayer.aNetworkCommunication.send(aClientPlayer.client,json);
-                    }
-                    //System.exit(0);
-                //aClientPlayer.JSONprocess(json);
-                }while(true);
 
-            }catch (ConnectionResetException e){
-                System.exit(0);
-            } catch (SocketTimeoutException e){
-                System.exit(0);
-            }catch (IOException e) {
-                System.exit(0);
-            } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        } finally {
-               // System.exit(0);
+        public ClientProxy(ClientManager cpobj)  {
+            this.aClientProxy = cpobj;
+            try {
+                System.out.println("Connecting to server");
+                clientSock = new Socket("localhost", 9001);
+                //setup of input and output stream
+                out = new PrintWriter(clientSock.getOutputStream(), true);
+                din = new BufferedReader(new InputStreamReader(clientSock.getInputStream()));
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-
-    }
-
-
-    public void send(String state, PlayerStructure player){
-        JSONObject aJSONObject = StringtoJSON(state,player);
-        aNetworkCommunication.send(client,aJSONObject);
-
-    }
-
-    public PlayerStructure getPlayer(int id){
-        for (PlayerStructure aplayer:player) {
-            if (aplayer.getID() == id)
-                return aplayer;
         }
-        return null;
-    }
 
+        /*
+        This method implements the necessary code to send the
+        data over the network using the socket.
+         */
+        public boolean send(Socket aSocket, JSONObject data) {
+            out.println(data.toJSONString());
+            System.out.println("\nsent"+data.toJSONString());
+            return true;
+        }
+
+        /*
+        This method implements the necessary code to receive the
+        data over the network using the socket.s
+         */
+        public JSONObject receive(Socket aSocket) throws IOException {
+            JSONObject data = null;
+            try {
+                String newPort = din.readLine();
+                JSONParser parse = new JSONParser();
+                data = (JSONObject) parse.parse(newPort);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            System.out.println("\nreceived "+data.toJSONString());
+            return data;
+        }
 
 
     /*
@@ -106,32 +82,21 @@ public class ClientProxy implements Callable<String> {
             case JSONCommand.MOVE:
                 break;
             case JSONCommand.INVALIDATE:
+                aClientProxy.processInvalidate((int)(long)aJSONObject.get("Id"),(int)(long)aJSONObject.get("SendToId"));
                 break;
             case JSONCommand.LASTMOVE:
-                int id = (int)(long)aJSONObject.get("Id");
-                PlayerStructure aPlayerStructure = getPlayer(id);
-                current = aPlayerStructure;
                 PlayerMove aPlayerMove = new PlayerMove((int)(long)aJSONObject.get("Row"),
                         (int)(long) aJSONObject.get("Column"),
                         (int)(long)aJSONObject.get("Id"));
-                id = (int)(long)aJSONObject.get("SendToId");
-                aPlayerStructure = getPlayer(id);
-                aPlayerStructure.lastMove(aPlayerMove);
-                System.out.println(aPlayerStructure);
-                System.out.println(this);
+                aClientProxy.processLastMove(aPlayerMove,(int)(long)aJSONObject.get("SendToId"));
                 break;
             case JSONCommand.REQUEST:
-                for(PlayerStructure aplayer:player) {
-                    if (aplayer.getID() == ((int) (long) aJSONObject.get("PlayerId"))) {
-                        current = aplayer;
-                        send("Move", aplayer);
-                    }
-                }
+                aClientProxy.processRequest(((int) (long) aJSONObject.get("PlayerId")));
                 break;
 
             case JSONCommand.CONFIRM:
                 String status = (String)aJSONObject.get("Status");
-                gameId = (int)(long) aJSONObject.get("GameId");
+                aClientProxy.processConfirm((int)(long) aJSONObject.get("GameId"));
                 break;
         }
         return null;
@@ -141,7 +106,7 @@ public class ClientProxy implements Callable<String> {
     /*
     This method convert the data into JSON object
      */
-    public JSONObject StringtoJSON(String state, PlayerStructure aplayer) {
+    public JSONObject StringtoJSON(String state, PlayerStructure aplayer, PlayerStructure[] player) {
         JSONObject json = new JSONObject();
         json.put("JSONCommand",state);
         switch (state){
@@ -163,41 +128,15 @@ public class ClientProxy implements Callable<String> {
         return json;
     }
 
-
-    @Override
-    public String call() throws Exception {
-        JSONprocess(json);
-        return null;
+    public void sendHelper(Socket client,String state, PlayerStructure aplayer,PlayerStructure[] player) {
+        JSONObject aJSONObject = StringtoJSON(state, aplayer, player);
+        send(client, aJSONObject);
     }
 
-    public String toString(){
-        String boardMark[][]=convertBoard();
-        String printable = "  "+boardMark[0][0]+"   |  "+ boardMark[0][1]+"    |  "+boardMark[0][2]+"   \n"+
-                "______|_______|______\n"+
-                "      |       |     \n"+
-                "  "+boardMark[1][0]+"   |  "+ boardMark[1][1]+"    |  "+boardMark[1][2]+"   \n"+
-                "______|_______|______\n"+
-                "      |       |     \n"+
-                "  "+boardMark[2][0]+"   |  "+ boardMark[2][1]+"    |  "+boardMark[2][2]+"   \n";
 
-        return printable;
-    }
-
-    private String[][] convertBoard() {
-        int tableSize = player[0].getTableSize();
-        String[][] boardMark = new String[tableSize][tableSize];
-        for (int iter=0;iter<tableSize;iter++){
-            for(int jiter=0;jiter<tableSize;jiter++){
-                boardMark[iter][jiter]=" ";
-                for (PlayerStructure aplayer :player) {
-                    if (player[0].getaTicTactoe().getBoard(iter,jiter) == aplayer.getID())
-                        boardMark[iter][jiter] = aplayer.getMark();
-                }
-            }
-        }
-        return boardMark;
-    }
 
 }
+
+
 
 

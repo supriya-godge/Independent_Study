@@ -1,5 +1,14 @@
 package proxyserver;
 
+
+/**
+ * This is the network communication class which is responsible for lower level
+ * network communication. It uses the sockets and TCP connection for the communication
+ * Auther: Supriya Godge
+ *         Sean Srout
+ *         James Helliotis
+ */
+
 import java.net.Socket;
 
 import engine.PlayerInfo;

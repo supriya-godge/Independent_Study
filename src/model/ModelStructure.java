@@ -1,4 +1,13 @@
 package model;
+
+
+/**
+ * This interface is for the structure of the model
+ * Auther: Supriya Godge
+ *         Sean Srout
+ *         James Helliotis
+ */
+
 import ServerPlayer.PlayerMove;
 
 
@@ -25,14 +34,5 @@ public interface ModelStructure {
     Move is valid if  0 >= row < totalRow and 0 >= column < totalColumn
      */
     boolean checkIfMoveValid(PlayerMove aPlayerMove);
-    /*
-    This method writes each move to the database for the game.
-     */
-    void storeGame(PlayerMove aPlayerMove);
 
-    /*
-    This method returns all the moves played in the specific game.
-    It takes the game id as an input and returns all the moves stored on that ID.
-     */
-    String returnMoves(int gameId);
 }

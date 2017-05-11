@@ -1,14 +1,17 @@
 package player;
 
 /**
- * Created by sup33 on 3/13/2017.
+ * This is a player structure for the player class
+ * Auther: Supriya Godge
+ *         Sean Srout
+ *         James Helliotis
  */
 public interface PlayerStructure {
 
     /*
     Init method initializes the player using the player id
      */
-     void init(int playerId, int tableSize, String mark);
+     void init(int playerId, int tableSize, String mark,int opp);
 
     /*
     This method is used to update the last move played in the

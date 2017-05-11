@@ -6,7 +6,10 @@ import java.util.Scanner;
 import model.TicTacToe;
 
 /**
- * Created by sup33 on 3/14/2017.
+ * This is a Server Player with the smart MinMax algorithm to find the next move
+ * Auther: Supriya Godge
+ *         Sean Srout
+ *         James Helliotis
  */
 public class ServerPlayer implements PlayerStructure {
     private int playerId;
@@ -19,19 +22,14 @@ public class ServerPlayer implements PlayerStructure {
 
     }
 
-    public ServerPlayer(int playerId, int tableSize, String mark) {
+    public void init(int playerId, int tableSize, String mark,int opponent) {
         this.playerId = playerId;
         this.mark = mark;
         this.tableSize = tableSize;
         this.aTicTacToe = new TicTacToe();
+        this.opponent = opponent;
     }
-    @Override
-    public void init(int playerId, int tableSize, String mark) {
-        this.playerId = playerId;
-        this.mark = mark;
-        this.tableSize = tableSize;
-        this.aTicTacToe = new TicTacToe();
-    }
+
 
     @Override
     public void lastMove(PlayerMove aPlayerMove) {
@@ -79,10 +77,7 @@ public class ServerPlayer implements PlayerStructure {
 
     }
 
-    public String toString(){
 
-        return aTicTacToe.toString();
-    }
 
 
 
@@ -95,7 +90,6 @@ public class ServerPlayer implements PlayerStructure {
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++) {
             boolean ans = checkrow(iter, id);
             if (ans) {
-                //System.out.println(ans);
                 return true;
             }
         }
@@ -103,7 +97,6 @@ public class ServerPlayer implements PlayerStructure {
             boolean ans = checkcolumn(iter, id);
 
             if (ans) {
-                //System.out.println("winner is  "+id);
                 return true;
             }
         }
@@ -252,22 +245,54 @@ public class ServerPlayer implements PlayerStructure {
       return tuple;
    }
 
+    public String toString(){
+        String boardMark[][]=convertBoard();
+        String printable = "  "+boardMark[0][0]+"   |  "+ boardMark[0][1]+"    |  "+boardMark[0][2]+"   \n"+
+                "______|_______|______\n"+
+                "      |       |     \n"+
+                "  "+boardMark[1][0]+"   |  "+ boardMark[1][1]+"    |  "+boardMark[1][2]+"   \n"+
+                "______|_______|______\n"+
+                "      |       |     \n"+
+                "  "+boardMark[2][0]+"   |  "+ boardMark[2][1]+"    |  "+boardMark[2][2]+"   \n";
+
+        return printable;
+    }
+
+    private String[][] convertBoard() {
+        int tableSize = 3;
+        String[][] boardMark = new String[tableSize][tableSize];
+        for (int iter=0;iter<tableSize;iter++){
+            for(int jiter=0;jiter<tableSize;jiter++){
+                boardMark[iter][jiter]=" ";
+
+                    if (aTicTacToe.getBoard(iter,jiter) == 999)
+                        boardMark[iter][jiter] = "O";
+                    if (aTicTacToe.getBoard(iter,jiter) == 123)
+                        boardMark[iter][jiter] = "X";
+
+            }
+        }
+        return boardMark;
+    }
+
    public static void main(String[] str){
         ServerPlayer aServerPlayer = new ServerPlayer();
        Scanner scan = new Scanner(System.in);
-        aServerPlayer.init(3,123,"X");
-        PlayerMove me=null;
-        PlayerMove opp=null;
+        aServerPlayer.init(3,999,"O",123);
+        PlayerMove me=new PlayerMove(0,0,999);
+        PlayerMove opp=new PlayerMove(0,0,123);
+       System.out.println(aServerPlayer);
         while(!aServerPlayer.isWin(me) && !aServerPlayer.isWin(opp)){
             System.out.println("Enter row and column");
             int r = scan.nextInt();
             int c = scan.nextInt();
-            aServerPlayer.aTicTacToe.setBoard(r,c,30);
+            aServerPlayer.aTicTacToe.setBoard(r,c,123);
             System.out.println(aServerPlayer);
+            System.out.println("Me playing");
             int[] result=aServerPlayer.maxD(0,me,opp);
             r=result[1];
             c=result[2];
-            aServerPlayer.aTicTacToe.setBoard(r,c,aServerPlayer.getID());
+            aServerPlayer.aTicTacToe.setBoard(r,c,999);
             System.out.println("Selected:"+r+" "+c);
             System.out.println(aServerPlayer);
         }

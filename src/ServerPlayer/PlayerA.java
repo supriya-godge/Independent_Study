@@ -17,19 +17,17 @@ public class PlayerA implements PlayerStructure {
 
 
 
-    public  PlayerA(int playerId, int tableSize, String mark) {
+    public void init(int playerId, int tableSize, String mark, int opp) {
         this.playerId = playerId;
         this.mark = mark;
         PlayerA.tableSize = tableSize;
         aTicTactoe = new TicTacToe();
+        this.opponent = opp;
         //System.out.println(this);
     }
 
 
-    @Override
-    public void init(int playerId, int tableSize, String mark) {
 
-    }
 
 
 

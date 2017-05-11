@@ -10,32 +10,30 @@ import java.util.Random;
 import java.util.concurrent.*;
 
 /**
- * Created by sup33 on 4/18/2017.
+ * This is a server player proxy.
+ * Auther: Supriya Godge
+ *         Sean Srout
+ *         James Helliotis
  */
 public class ServerPlayerProxy implements Callable<String> {
-    //NetworkCommunication aNetworkCommunication;
     Socket client;
     PlayerStructure player1;
-    PlayerStructure player2;
     int gameId;
-    static Random aRandom;
     JSONObject json;
     PlayerStructure current;
     Engine aEngine;
 
-    public ServerPlayerProxy(Engine con){
-        this.player1 = new ServerPlayer(999,3,TicTacToe.ROUND);
+    public ServerPlayerProxy(Engine con,int opp){
+        this.player1 = new ServerPlayer();
+        player1.init(999,3,TicTacToe.ROUND,opp);
         aEngine = con;
-
     }
 
 
 
     public void send(String state, PlayerStructure player){
         JSONObject aJSONObject = StringtoJSON(state,player);
-        aEngine.JSONprocess(aJSONObject);
-       // aNetworkCommunication.send(client,aJSONObject);
-
+        aEngine.aProxyGameServer.JSONprocess(aJSONObject);
     }
 
     public String getPlayer(int id){
@@ -43,8 +41,6 @@ public class ServerPlayerProxy implements Callable<String> {
             return player1.getMark();
         return TicTacToe.CROSS;
     }
-
-
 
     /*
     This method reads the JSON objects and take necessary action
@@ -64,22 +60,13 @@ public class ServerPlayerProxy implements Callable<String> {
                         (int) aJSONObject.get("Column"),
                         (int)aJSONObject.get("Id"));
                 player1.lastMove(aPlayerMove);
-                //System.out.println(player1);
                 break;
             case JSONCommand.REQUEST:
-
-                if (player1.getID()==((int) aJSONObject.get("PlayerId"))) {
-                    current = player1;
-                    send("Move", player1);
-                }
-                else {
-                    current = player2;
-                    send("Move", player2);
-                }
+                current = player1;
+                send("Move", player1);
                 break;
 
             case JSONCommand.CONFIRM:
-                String status = (String)aJSONObject.get("Status");
                 gameId = (int)(long) aJSONObject.get("GameId");
                 break;
         }
@@ -95,9 +82,6 @@ public class ServerPlayerProxy implements Callable<String> {
         json.put("JSONCommand",state);
         switch (state){
             case JSONCommand.INITIALIZE:
-                json.put("Server","No");
-                json.put("Player1",(long)player1.getID());
-                json.put("Player2",(long)player2.getID());
                 break;
             case JSONCommand.MOVE:
                 System.out.println(player.getID());

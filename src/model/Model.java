@@ -1,14 +1,20 @@
 package model;
 
+
+/**
+ * This class hold the game state (board) and functions related to the state
+ * Auther: Supriya Godge
+ *         Sean Srout
+ *         James Helliotis
+ */
+
 import ServerPlayer.PlayerMove;
 
 //import PlayerMove;
 
 import org.json.simple.JSONObject;
 
-/**
- * Created by sup33 on 3/13/2017.
- */
+
 public class Model implements ModelStructure{
     private TicTacToe aTicTacToe;
     public Model(){
@@ -16,8 +22,11 @@ public class Model implements ModelStructure{
     }
 
     @Override
+    /* This function returns true if the player Id in the move has won*/
     public boolean isWin(PlayerMove aPlayerMove ) {
         int id=aPlayerMove.getId();
+
+        // check all the rows
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++) {
             boolean ans = checkrow(iter, id);
             if (ans) {
@@ -25,6 +34,7 @@ public class Model implements ModelStructure{
                 return true;
             }
         }
+        //Check all the columns
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
             boolean ans = checkcolumn(iter, id);
 
@@ -34,6 +44,8 @@ public class Model implements ModelStructure{
             }
         }
         boolean win = true;
+
+        //Check the diagonal
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
             if (aTicTacToe.getBoard(iter,iter)!= 0 && id==aTicTacToe.getBoard(iter,iter)){
                 continue;
@@ -48,6 +60,8 @@ public class Model implements ModelStructure{
 
         win = true;
         int jiter=aTicTacToe.getTableSize()-1;
+
+        //Check the reverse diagonal
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
             if (aTicTacToe.getBoard(iter,jiter)!= 0 && id==aTicTacToe.getBoard(iter,jiter)){
                 jiter--;
@@ -66,6 +80,7 @@ public class Model implements ModelStructure{
         return false;
     }
 
+    /*This function checks if there are three same consecutive player id in the given row*/
     public boolean checkrow(int row, int id){
         boolean win = true;
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
@@ -81,6 +96,7 @@ public class Model implements ModelStructure{
         return win;
     }
 
+    /*This function checks if there are three same consecutive player id in the given column*/
     private boolean checkcolumn(int row, int id) {
         boolean win = true;
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
@@ -98,6 +114,7 @@ public class Model implements ModelStructure{
     }
 
     @Override
+    /*This method checks if the game is draw*/
     public boolean isDraw() {
         for(int iter=0;iter<aTicTacToe.getTableSize();iter++){
             for(int jiter=0;jiter<aTicTacToe.getTableSize();jiter++){
@@ -109,6 +126,7 @@ public class Model implements ModelStructure{
     }
 
     @Override
+    /*This method updates the board based on the input player move*/
     public void updateBoard(PlayerMove aPlayerMove) {
          if(checkIfMoveValid(aPlayerMove)){
             aTicTacToe.setBoard(aPlayerMove.getRow(),aPlayerMove.getColumn(), aPlayerMove.getId());
@@ -116,6 +134,9 @@ public class Model implements ModelStructure{
     }
 
     @Override
+    /*
+    This method checks if the given move is valid
+     */
     public boolean checkIfMoveValid(PlayerMove aPlayerMove) {
         if (aPlayerMove.getRow() < aTicTacToe.getTableSize() &&
                 aPlayerMove.getRow() < aTicTacToe.getTableSize() &&
@@ -124,15 +145,7 @@ public class Model implements ModelStructure{
         return false;
     }
 
-    @Override
-    public void storeGame(PlayerMove aPlayerMove) {
 
-    }
-
-    @Override
-    public String returnMoves(int gameId) {
-        return null;
-    }
 
     public String toString(){
         return aTicTacToe.toString();
