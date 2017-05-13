@@ -1,5 +1,7 @@
 package player;
 
+import java.util.ArrayList;
+
 /**
  * This is a player structure for the player class
  * Auther: Supriya Godge
@@ -11,7 +13,7 @@ public interface PlayerStructure {
     /*
     Init method initializes the player using the player id
      */
-     void init(int playerId, int tableSize, String mark,int opp);
+     void init(int playerId, int tableSize, String mark,ArrayList<Integer> opp);
 
     /*
     This method is used to update the last move played in the

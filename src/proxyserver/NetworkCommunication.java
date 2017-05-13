@@ -34,8 +34,4 @@ interface NetworkCommunication {
 
 
 
-
-
-
-
 }

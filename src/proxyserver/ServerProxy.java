@@ -23,7 +23,7 @@ import java.net.SocketTimeoutException;
  *         Sean Srout
  *         James Helliotis
  */
-public class ProxyGameServer implements NetworkCommunication {
+public class ServerProxy implements NetworkCommunication {
     static protected ServerSocket serverSock;
     PrintWriter out;
     Socket aSocket;
@@ -38,7 +38,7 @@ public class ProxyGameServer implements NetworkCommunication {
         }
     }
 
-    public ProxyGameServer(Engine eng){
+    public ServerProxy(Engine eng){
         this.aEngine = eng;
     }
 
@@ -141,8 +141,8 @@ public class ProxyGameServer implements NetworkCommunication {
         String state = (String) aJSONObject.get("JSONCommand");
         switch (state){
             case JSONCommand.INITIALIZE:
-                int player2 = (int) (long)aJSONObject.get("Player2");
-                int player1 = (int)(long) aJSONObject.get("Player1");
+                int player2 = (int) (long)aJSONObject.get("Player1");
+                int player1 = (int)(long) aJSONObject.get("Player0");
                 aEngine.processInitialize(player1,player2);
                 break;
             case JSONCommand.MOVE:
@@ -153,7 +153,10 @@ public class ProxyGameServer implements NetworkCommunication {
                 break;
             case JSONCommand.INVALIDATE:
                 id =(int)(long)aJSONObject.get("PlayerId");
-                aEngine.removePlayer(id);
+                //aEngine.removePlayer(id);
+                aPlayerMove = new PlayerMove(0,
+                        0,id);
+                StringtoJSON(JSONCommands.INVALIDATE,null,aPlayerMove,0);
                 break;
 
         }

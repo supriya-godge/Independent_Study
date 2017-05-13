@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import  java.util.Random;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -23,7 +24,7 @@ public class PlayerA implements PlayerStructure{
     private String  mark;
     private TicTacToe aTicTactoe;
     private static int tableSize=3;
-    private int opponent;
+    private ArrayList<Integer> opponent;
 
     public  int getTableSize() {
         return tableSize;
@@ -41,7 +42,7 @@ public class PlayerA implements PlayerStructure{
 
     }
 
-    public  void init(int playerId, int tableSize, String mark, int opp) {
+    public  void init(int playerId, int tableSize, String mark, ArrayList<Integer> opp) {
         this.playerId = playerId;
         this.mark = mark;
         PlayerA.tableSize = tableSize;
@@ -171,7 +172,7 @@ public class PlayerA implements PlayerStructure{
                     boardMark[iter][jiter] = mark;
                 }
 
-                if (aTicTactoe.getBoard(iter, jiter) == opponent) {
+                if (aTicTactoe.getBoard(iter, jiter) == opponent.get(0)) {
                     boardMark[iter][jiter] = "S";
                 }
             }

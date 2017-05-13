@@ -19,10 +19,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 
-
-    public class ClientProxy {
+public class ClientProxy {
         private static Socket clientSock;
         private BufferedReader din;
         private PrintWriter out;
@@ -82,7 +82,7 @@ import java.net.UnknownHostException;
             case JSONCommand.MOVE:
                 break;
             case JSONCommand.INVALIDATE:
-                aClientProxy.processInvalidate((int)(long)aJSONObject.get("Id"),(int)(long)aJSONObject.get("SendToId"));
+                aClientProxy.processInvalidate((int)(long)aJSONObject.get("PlayerId"),(int)(long)aJSONObject.get("SendToId"));
                 break;
             case JSONCommand.LASTMOVE:
                 PlayerMove aPlayerMove = new PlayerMove((int)(long)aJSONObject.get("Row"),
@@ -106,14 +106,19 @@ import java.net.UnknownHostException;
     /*
     This method convert the data into JSON object
      */
-    public JSONObject StringtoJSON(String state, PlayerStructure aplayer, PlayerStructure[] player) {
+    public JSONObject StringtoJSON(String state, PlayerStructure aplayer, ArrayList<PlayerStructure> player,
+                                   ArrayList<Integer> serverPlayer) {
         JSONObject json = new JSONObject();
         json.put("JSONCommand",state);
         switch (state){
             case JSONCommand.INITIALIZE:
                 //json.put("Server","Yes");
-                json.put("Player1",player[0].getID());
-                json.put("Player2",player[1].getID());
+                int iter=0;
+                for(iter=0;iter<player.size();iter++) {
+                    json.put("Player"+iter, player.get(iter).getID());
+                }
+                for(int jiter=iter;jiter<serverPlayer.size()+iter;jiter++)
+                    json.put("Player"+jiter,serverPlayer.get(jiter-iter));
                 break;
             case JSONCommand.MOVE:
                 PlayerMove aPlayerMove = aplayer.move();
@@ -128,8 +133,9 @@ import java.net.UnknownHostException;
         return json;
     }
 
-    public void sendHelper(Socket client,String state, PlayerStructure aplayer,PlayerStructure[] player) {
-        JSONObject aJSONObject = StringtoJSON(state, aplayer, player);
+    public void sendHelper(Socket client, String state, PlayerStructure aplayer, ArrayList<PlayerStructure> player,
+                           ArrayList<Integer> serverPlayer) {
+        JSONObject aJSONObject = StringtoJSON(state, aplayer, player,serverPlayer);
         send(client, aJSONObject);
     }
 

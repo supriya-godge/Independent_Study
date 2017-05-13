@@ -23,7 +23,7 @@ import logger.Logger;
 import model.Model;
 import model.TicTacToe;
 import org.json.simple.JSONObject;
-import proxyserver.ProxyGameServer;
+import proxyserver.ServerProxy;
 import ServerPlayer.PlayerMove;
 
 import java.io.IOException;
@@ -36,7 +36,7 @@ import java.util.ArrayList;
  */
 public class Engine implements Runnable{
     private static int gameId =1000;
-    public ProxyGameServer aProxyGameServer;
+    public ServerProxy aProxyGameServer;
     private Model aModel;
     private ArrayList<PlayerInfo> player = new ArrayList<>();
     private ServerPlayerProxy serverplayer;
@@ -51,7 +51,7 @@ public class Engine implements Runnable{
         gameId+=1;
         aModel = new Model();
         aLogger = new Logger(gameId);
-        aProxyGameServer = new ProxyGameServer(this);
+        aProxyGameServer = new ServerProxy(this);
         //Add both the players in the player list
         player.add(new PlayerInfo(TicTacToe.CROSS));
         player.add(new PlayerInfo(TicTacToe.ROUND));
@@ -76,6 +76,13 @@ public class Engine implements Runnable{
     }
 
 
+    public void processInvalidated(){
+        for(PlayerInfo iter:player) {
+            JSONObject json=aProxyGameServer.StringtoJSON("Invalid",iter,aLastMove,gameId);
+            send(json,iter);
+
+        }
+    }
     /* In the Start process main-thread waits at the accept() statment for player proxy to connect
        after accepting the request it creates new thread and starts the game*/
     public void startProcess(){
